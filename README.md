@@ -1,0 +1,105 @@
+# AERO-DIAL
+
+A retro audio interface: a 3D CD player paired with a phone-style numeric dialer.
+Dial `1984`, hit **CALL**, and the disc spins up.
+
+Built with Vue 3 + TypeScript + Three.js, bundled with Vite. Runs fully offline —
+no CDN scripts, no remote fonts.
+
+## Quick start
+
+```sh
+npm install
+npm run dev       # http://localhost:5173
+```
+
+## Scripts
+
+| Script              | What it does                                   |
+| ------------------- | ---------------------------------------------- |
+| `npm run dev`       | Vite dev server with HMR                       |
+| `npm run build`     | Type-check (`vue-tsc`) + production build      |
+| `npm run preview`   | Serve the production build locally             |
+| `npm run typecheck` | Run `vue-tsc --noEmit` only                    |
+
+## Project structure
+
+```
+.
+├── index.html                    # Vite entry, mounts #app
+├── public/
+│   └── track.mp3                 # (optional) audio for the CALL track
+├── src/
+│   ├── main.ts                   # Bootstrap + global CSS + fonts
+│   ├── App.vue                   # Dialer UI + state
+│   ├── styles.css                # All visual styling
+│   ├── env.d.ts                  # Vue / Vite type shims
+│   └── composables/
+│       ├── useAudio.ts           # DTMF tones, MP3 playback, synth fallback
+│       └── useThreeScene.ts      # Three.js CD player scene
+├── tsconfig.json
+├── vite.config.ts
+└── package.json
+```
+
+## Custom track
+
+Drop an MP3 at `public/track.mp3`. It plays on loop with a 1.5 s fade-in when you
+dial `1984` + **CALL**, and fades out over 0.5 s on **END**.
+
+If the file is missing or fails to decode, a synthesized C-major sawtooth chord
+plays as a fallback. To use a different filename, edit the single line in
+`src/App.vue`:
+
+```ts
+const trackUrl = `${import.meta.env.BASE_URL}track.mp3`;
+```
+
+## Common tweaks
+
+All visual tweaks live in `src/composables/useThreeScene.ts`.
+
+**Camera angle.** Default is a 3/4 view. For top-down:
+
+```ts
+camera.up.set(0, 0, -1);
+camera.position.set(0, 6, 0);
+camera.lookAt(0, 0, 0);
+```
+
+**Spin speed.** In the `animate` loop:
+
+```ts
+targetSpeed = isPlaying.value ? 0.25 : 0;   // radians per frame
+```
+
+**Brightness.** Adjust at the top of `initThreeScene`:
+
+```ts
+renderer.toneMappingExposure = 1.2;         // 0.9 = darker, 1.5 = brighter
+```
+
+**Accent light color / intensity.**
+
+```ts
+const pointLight = new PointLight(0x00f0ff, 4, 20, 0);
+```
+
+## Tech notes
+
+- **Three.js**: lighting uses physically-correct intensities (mandatory since
+  r155). The two `PointLight`s have `decay = 0` to keep the original visual
+  falloff. The CD's metallic look comes from `RoomEnvironment` as the studio
+  probe — pure mirror surfaces (`metalness: 1.0`) only show what's in the
+  environment map, not direct lights.
+- **Audio**: a single `AudioContext` powers DTMF tones, MP3 playback, and the
+  synth fallback. The MP3 is fetched once and cached as a decoded `AudioBuffer`.
+- **Fonts**: `@fontsource/inter` and `@fontsource/share-tech-mono` are bundled
+  locally — nothing fetched from Google Fonts at runtime.
+- **Pointer events**: all dial-pad interaction uses `pointerdown` for unified
+  mouse / touch / pen support.
+
+## Browser support
+
+Modern evergreen browsers with WebGL2 and Web Audio API. Tested on current
+Chrome, Safari, and Firefox.
