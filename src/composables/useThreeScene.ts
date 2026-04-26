@@ -3,20 +3,18 @@ import {
   AmbientLight,
   BoxGeometry,
   CanvasTexture,
-  Color,
   CylinderGeometry,
   DirectionalLight,
-  DoubleSide,
   Mesh,
-  MeshBasicMaterial,
   MeshStandardMaterial,
   PerspectiveCamera,
-  PlaneGeometry,
   PMREMGenerator,
   PointLight,
   Scene,
+  SRGBColorSpace,
   WebGLRenderer,
 } from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import type { Ref } from 'vue';
 
 export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean>) {
@@ -35,44 +33,26 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
   camera.position.set(0, 5, 7);
   camera.lookAt(0, 0, 0);
 
-  // Virtual "Photo Studio" environment map for realistic metal reflections.
+  // Studio environment map so metallic surfaces have something to reflect.
   const pmremGenerator = new PMREMGenerator(renderer);
-  pmremGenerator.compileEquirectangularShader();
-
-  const envScene = new Scene();
-  envScene.background = new Color(0x111111);
-
-  const envLight1 = new Mesh(
-    new PlaneGeometry(10, 10),
-    new MeshBasicMaterial({ color: 0xffffff, side: DoubleSide }),
-  );
-  envLight1.position.set(0, 8, 0);
-  envLight1.rotation.x = Math.PI / 2;
-  envScene.add(envLight1);
-
-  const envLight2 = new Mesh(
-    new PlaneGeometry(2, 8),
-    new MeshBasicMaterial({ color: 0x00f0ff, side: DoubleSide }),
-  );
-  envLight2.position.set(8, 4, 0);
-  envLight2.rotation.y = -Math.PI / 2;
-  envScene.add(envLight2);
-
-  const envMap = pmremGenerator.fromScene(envScene, 0.04).texture;
+  const envMap = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
   scene.environment = envMap;
+  pmremGenerator.dispose();
 
-  const ambientLight = new AmbientLight(0xffffff, 0.3);
+  const ambientLight = new AmbientLight(0xffffff, 0.6);
   scene.add(ambientLight);
 
-  const dirLight = new DirectionalLight(0xffffff, 1.5);
+  const dirLight = new DirectionalLight(0xffffff, 3);
   dirLight.position.set(5, 10, 5);
   scene.add(dirLight);
 
-  const pointLight = new PointLight(0x00f0ff, 2, 20);
+  // Decay 0 disables physically-correct distance falloff so these lights
+  // behave like the original r128 setup at the same intensity scale.
+  const pointLight = new PointLight(0x00f0ff, 4, 20, 0);
   pointLight.position.set(-3, 3, 3);
   scene.add(pointLight);
 
-  const backLight = new PointLight(0xff00ff, 1, 20);
+  const backLight = new PointLight(0xff00ff, 2, 20, 0);
   backLight.position.set(3, 2, -3);
   scene.add(backLight);
 
@@ -129,6 +109,7 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
   ctx.fillText('DIAL', 256, 280);
 
   const cdTexture = new CanvasTexture(cdCanvas);
+  cdTexture.colorSpace = SRGBColorSpace;
   const cdMat = new MeshStandardMaterial({
     map: cdTexture,
     metalness: 1.0,
@@ -166,9 +147,9 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
     cd.rotation.y += currentSpeed;
 
     if (isPlaying.value) {
-      pointLight.intensity = 2 + Math.sin(Date.now() * 0.005) * 1;
+      pointLight.intensity = 4 + Math.sin(Date.now() * 0.005) * 2;
     } else {
-      pointLight.intensity = 0.5;
+      pointLight.intensity = 1;
     }
 
     renderer.render(scene, camera);
