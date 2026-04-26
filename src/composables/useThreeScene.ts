@@ -30,8 +30,19 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
     0.1,
     100,
   );
-  camera.position.set(0, 5, 7);
-  camera.lookAt(0, 0, 0);
+  camera.up.set(0, 0, -1);
+
+  const FRAME_RADIUS = 2.0; // CD radius 1.8 + small margin
+  const frameCD = () => {
+    const aspect = canvas.clientWidth / canvas.clientHeight;
+    const fovY = (camera.fov * Math.PI) / 180;
+    const fovX = 2 * Math.atan(aspect * Math.tan(fovY / 2));
+    const limiting = Math.min(fovX, fovY);
+    const distance = FRAME_RADIUS / Math.tan(limiting / 2);
+    camera.position.set(0, 0.4 + distance, 0);
+    camera.lookAt(0, 0, 0);
+  };
+  frameCD();
 
   // Studio environment map so metallic surfaces have something to reflect.
   const pmremGenerator = new PMREMGenerator(renderer);
@@ -135,6 +146,7 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
+      frameCD();
     }
   };
 
