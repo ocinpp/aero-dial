@@ -1,10 +1,17 @@
 :root {
-  --bg-color: #121214;
+  --bg-color: #0d0d0f;
   --metal-dark: #2a2a2d;
   --metal-light: #e0e0e0;
   --accent-cyan: #00f0ff;
   --accent-red: #ff3b3b;
   --text-dim: #5a5a64;
+  --vfd-cyan: #5cdbdf;
+  --vfd-dark: #051014;
+  --sony-yellow: #f8b832;
+  /* Silver & Wood aesthetic */
+  --chassis-light: #f5f5f5;
+  --chassis-mid: #e0e0e0;
+  --chassis-dark: #b8b8b8;
 }
 
 * {
@@ -20,7 +27,7 @@ body {
   overflow: hidden;
   background-color: var(--bg-color);
   color: var(--metal-light);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -42,9 +49,15 @@ body {
 .cd-panel {
   width: 60%;
   background: radial-gradient(circle at center, #1a1a1f 0%, #0a0a0d 100%);
-  border-right: 1px solid #2a2a2d;
+  border-right: 1px solid #1a1a1c;
+  border-top: 150px solid #111; /* Align with the dialer panel black acrylic */
+  box-shadow:
+    inset 2px 2px 10px rgba(255, 255, 255, 0.05),
+    inset -5px -5px 20px rgba(0, 0, 0, 0.5),
+    5px 0 15px rgba(0, 0, 0, 0.6);
+  z-index: 2;
+  position: relative;
 }
-
 .three-canvas {
   width: 100%;
   height: 100%;
@@ -54,21 +67,40 @@ body {
   z-index: 1;
 }
 
+.cd-panel::after {
+  content: "";
+  position: absolute;
+  top: -150px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  z-index: 5;
+}
+
 .led-overlay {
   position: absolute;
-  bottom: 12%;
-  z-index: 2;
-  background: rgba(10, 10, 12, 0.9);
-  backdrop-filter: blur(10px);
-  border: 1px solid #333;
-  border-radius: 6px;
-  padding: 1.2rem 2.5rem;
-  font-family: 'Share Tech Mono', monospace;
-  color: var(--accent-cyan);
-  text-shadow: 0 0 8px var(--accent-cyan);
-  font-size: 1.4rem;
-  letter-spacing: 3px;
+  top: -105px; /* Align with the VFD display */
+  bottom: auto;
+  z-index: 5;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: "Share Tech Mono", monospace;
+  color: var(--vfd-cyan);
+  text-shadow:
+    0 0 10px rgba(92, 219, 223, 0.8),
+    0 0 2px var(--vfd-cyan);
+  font-size: 2.4rem;
+  letter-spacing: 8px;
   transition: all 0.3s ease;
+  box-shadow: none;
 }
 
 .led-overlay.error {
@@ -76,38 +108,123 @@ body {
   text-shadow: 0 0 8px var(--accent-red);
 }
 
+/* SONY ES STYLE DIALER */
 .dialer-panel {
   width: 40%;
-  background: linear-gradient(135deg, #1e1e22 0%, #141416 100%);
-  padding: 2rem;
+  background: var(--bg-color);
+  padding: 0;
+  z-index: 1;
 }
 
-.dialer-display {
-  width: 280px;
-  height: 70px;
-  background: #050508;
-  border: 2px solid #2a2a2d;
-  border-radius: 8px;
-  margin-bottom: 2.5rem;
+.dialer-chassis {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    var(--chassis-light) 0%,
+    var(--chassis-mid) 40%,
+    var(--chassis-dark) 100%
+  );
+  border-top: 150px solid #111; /* The black acrylic top section */
+  box-shadow:
+    inset 2px 2px 10px rgba(255, 255, 255, 0.8),
+    inset -5px -5px 20px rgba(0, 0, 0, 0.2);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 2.2rem;
-  color: var(--accent-cyan);
-  text-shadow: 0 0 8px var(--accent-cyan);
-  letter-spacing: 6px;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9);
+  padding: 2rem;
   position: relative;
 }
 
-.cursor {
+.dialer-chassis::after {
+  content: "";
   position: absolute;
-  right: 20px;
-  width: 2px;
-  height: 28px;
-  background: var(--accent-cyan);
+  top: -150px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.dialer-chassis::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.02) 2px,
+    rgba(0, 0, 0, 0.02) 4px
+  );
+  pointer-events: none;
+}
+
+/* VFD Display */
+.vfd-bezel {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  margin-bottom: 3rem;
+  width: 280px;
+  position: absolute;
+  top: -105px; /* Move it up into the black acrylic section */
+}
+
+.vfd-display {
+  width: 100%;
+  height: 60px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 2.4rem;
+  color: var(--vfd-cyan);
+  text-shadow:
+    0 0 10px rgba(92, 219, 223, 0.8),
+    0 0 2px var(--vfd-cyan);
+  letter-spacing: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 50%,
+    rgba(0, 0, 0, 0.2) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.cursor {
+  display: inline-block;
+  width: 18px;
+  height: 32px;
+  background: var(--vfd-cyan);
+  box-shadow: 0 0 8px var(--vfd-cyan);
   animation: blink 1s step-end infinite;
+  margin-left: 4px;
 }
 
 @keyframes blink {
@@ -116,104 +233,151 @@ body {
   }
 }
 
-.svg-dialer {
-  width: 320px;
-  height: 480px;
-  user-select: none;
-  touch-action: manipulation;
+/* Numpad */
+.numpad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px 25px;
+  margin-top: 1.5rem;
+  margin-bottom: 2.5rem;
+  position: relative;
+  z-index: 10;
 }
 
-.dial-btn {
+.metal-btn {
+  width: 68px;
+  height: 48px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  background: linear-gradient(to bottom, #f0f0f0 0%, #d4d4d4 40%, #b0b0b0 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2),
+    0 4px 6px rgba(0, 0, 0, 0.4),
+    0 2px 3px rgba(0, 0, 0, 0.2);
   cursor: pointer;
-  transition: transform 0.05s ease;
-}
-
-.dial-btn circle {
-  fill: url(#metalGradient);
-  stroke: #3a3a3f;
-  stroke-width: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   transition:
-    fill 0.05s,
-    stroke 0.05s;
-  filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.4));
+    transform 0.05s ease,
+    box-shadow 0.05s ease;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.dial-btn.is-pressed circle {
-  fill: #00f0ff22;
-  stroke: var(--accent-cyan);
-  filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4));
-}
-
-.dial-btn text {
-  fill: var(--metal-light);
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  font-size: 24px;
-  text-anchor: middle;
-  dominant-baseline: central;
+.metal-btn::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border-radius: 4px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
   pointer-events: none;
 }
 
+.btn-label {
+  color: #222;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.metal-btn.is-pressed {
+  transform: translateY(3px) scale(0.96);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.4),
+    0 1px 1px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(to bottom, #d4d4d4 0%, #b0b0b0 100%);
+}
+
+.metal-btn.is-pressed .btn-label {
+  color: #000;
+  transform: translateY(1px);
+}
+/* Action Buttons */
+.action-row {
+  display: flex;
+  gap: 15px;
+  z-index: 10;
+}
+
 .action-btn {
+  width: 80px;
+  height: 36px;
+  border-radius: 18px; /* Classic pill shape for action buttons */
+  border: none;
+  outline: none;
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 15px;
   cursor: pointer;
-  touch-action: manipulation;
-}
-
-.action-btn rect {
-  rx: 8;
-  ry: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition:
-    fill 0.05s,
-    filter 0.05s;
-  filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.5));
+    transform 0.05s ease,
+    box-shadow 0.05s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.call-btn rect {
-  fill: var(--accent-cyan);
-}
-.call-btn text {
-  fill: #000;
-  font-weight: bold;
-  font-size: 18px;
-}
-.call-btn.is-pressed rect {
-  fill: #ffffff;
-  filter: drop-shadow(0 0 10px var(--accent-cyan));
+.clr-btn,
+.end-btn,
+.call-btn {
+  background: linear-gradient(to bottom, #3a3a3c 0%, #151518 100%);
+  border-top: 1px solid #5a5a60;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.6),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.4);
 }
 
-.end-btn rect {
-  fill: var(--accent-red);
-}
-.end-btn text {
-  fill: #fff;
-  font-weight: bold;
-  font-size: 18px;
-}
-.end-btn.is-pressed rect {
-  fill: #ff8888;
-  filter: drop-shadow(0 0 10px var(--accent-red));
+.clr-btn.is-pressed,
+.end-btn.is-pressed,
+.call-btn.is-pressed {
+  transform: translateY(2px);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    inset 0 2px 5px rgba(0, 0, 0, 0.8);
 }
 
-.clr-btn rect {
-  fill: #555555;
+.clr-btn {
+  color: #aaa;
 }
-.clr-btn text {
-  fill: #fff;
-  font-weight: bold;
-  font-size: 18px;
+
+.end-btn {
+  color: var(--accent-red);
 }
-.clr-btn.is-pressed rect {
-  fill: #888888;
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+
+.call-btn {
+  color: var(--vfd-cyan);
 }
 
 .instruction {
   margin-top: 2.5rem;
-  color: var(--text-dim);
-  font-size: 0.75rem;
+  color: #333;
+  font-size: 0.7rem;
   text-align: center;
-  letter-spacing: 2px;
+  letter-spacing: 4px;
   text-transform: uppercase;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  z-index: 10;
 }
 
 @media (max-width: 768px) {
@@ -232,6 +396,10 @@ body {
   }
   .instruction {
     display: none;
+  }
+  .dialer-chassis {
+    border-left: none;
+    /* Removed the border-top override so the 150px black acrylic top remains visible */
   }
 }
 

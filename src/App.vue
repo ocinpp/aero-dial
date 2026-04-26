@@ -98,91 +98,67 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- DIALER SECTION -->
+    <!-- DIALER SECTION (SONY CMT STYLE) -->
     <div class="panel dialer-panel">
-      <div class="dialer-display">
-        {{ dialedNumber || "" }}
-        <span v-if="!isPlaying" class="cursor" />
-      </div>
+      <div class="dialer-chassis">
+        <div class="vfd-bezel">
+          <div class="vfd-display">
+            {{ dialedNumber || "" }}
+            <span v-if="!isPlaying" class="cursor" />
+          </div>
+        </div>
 
-      <svg class="svg-dialer" viewBox="0 0 320 480">
-        <defs>
-          <linearGradient id="metalGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" style="stop-color: #4a4a4f; stop-opacity: 1" />
-            <stop offset="50%" style="stop-color: #2a2a2d; stop-opacity: 1" />
-            <stop offset="100%" style="stop-color: #1a1a1d; stop-opacity: 1" />
-          </linearGradient>
-        </defs>
+        <div class="numpad-grid">
+          <button
+            v-for="key in [
+              { k: '1', label: '1' },
+              { k: '2', label: '2' },
+              { k: '3', label: '3' },
+              { k: '4', label: '4' },
+              { k: '5', label: '5' },
+              { k: '6', label: '6' },
+              { k: '7', label: '7' },
+              { k: '8', label: '8' },
+              { k: '9', label: '9' },
+              { k: '*', label: '★' },
+              { k: '0', label: '0' },
+              { k: '#', label: '#' },
+            ]"
+            :key="key.k"
+            class="metal-btn"
+            :class="{ 'is-pressed': activeKey === key.k }"
+            @pointerdown="pressKey(key.k)"
+          >
+            <span class="btn-label">{{ key.label }}</span>
+          </button>
+        </div>
 
-        <!-- Number keys -->
-        <g
-          v-for="key in [
-            { k: '1', cx: 80, cy: 60, label: '1' },
-            { k: '2', cx: 160, cy: 60, label: '2' },
-            { k: '3', cx: 240, cy: 60, label: '3' },
-            { k: '4', cx: 80, cy: 150, label: '4' },
-            { k: '5', cx: 160, cy: 150, label: '5' },
-            { k: '6', cx: 240, cy: 150, label: '6' },
-            { k: '7', cx: 80, cy: 240, label: '7' },
-            { k: '8', cx: 160, cy: 240, label: '8' },
-            { k: '9', cx: 240, cy: 240, label: '9' },
-            { k: '*', cx: 80, cy: 330, label: '★' },
-            { k: '0', cx: 160, cy: 330, label: '0' },
-            { k: '#', cx: 240, cy: 330, label: '#' },
-          ]"
-          :key="key.k"
-          class="dial-btn"
-          :class="{ 'is-pressed': activeKey === key.k }"
-          @pointerdown="pressKey(key.k)"
-        >
-          <circle :cx="key.cx" :cy="key.cy" r="32" />
-          <text :x="key.cx" :y="key.cy">{{ key.label }}</text>
-        </g>
-
-        <!-- Action Buttons: CLR, END, CALL -->
-        <g
-          class="action-btn clr-btn"
-          :class="{ 'is-pressed': activeKey === 'clr' }"
-          @pointerdown="clearNumber()"
-        >
-          <rect x="30" y="410" width="75" height="40" />
-          <text x="67" y="432" text-anchor="middle" dominant-baseline="central">
+        <div class="action-row">
+          <button
+            class="action-btn clr-btn"
+            :class="{ 'is-pressed': activeKey === 'clr' }"
+            @pointerdown="clearNumber()"
+          >
             CLR
-          </text>
-        </g>
-        <g
-          class="action-btn end-btn"
-          :class="{ 'is-pressed': activeKey === 'end' }"
-          @pointerdown="endCall()"
-        >
-          <rect x="120" y="410" width="75" height="40" />
-          <text
-            x="157"
-            y="432"
-            text-anchor="middle"
-            dominant-baseline="central"
+          </button>
+          <button
+            class="action-btn end-btn"
+            :class="{ 'is-pressed': activeKey === 'end' }"
+            @pointerdown="endCall()"
           >
             END
-          </text>
-        </g>
-        <g
-          class="action-btn call-btn"
-          :class="{ 'is-pressed': activeKey === 'call' }"
-          @pointerdown="makeCall()"
-        >
-          <rect x="210" y="410" width="75" height="40" />
-          <text
-            x="247"
-            y="432"
-            text-anchor="middle"
-            dominant-baseline="central"
+          </button>
+          <button
+            class="action-btn call-btn"
+            :class="{ 'is-pressed': activeKey === 'call' }"
+            @pointerdown="makeCall()"
           >
             CALL
-          </text>
-        </g>
-      </svg>
+          </button>
+        </div>
 
-      <div class="instruction">Dial 1984 to unlock</div>
+        <div class="instruction">DIRECT TRACK ACCESS</div>
+      </div>
     </div>
   </div>
 </template>

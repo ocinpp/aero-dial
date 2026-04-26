@@ -15,12 +15,12 @@ npm run dev       # http://localhost:5173
 
 ## Scripts
 
-| Script              | What it does                                   |
-| ------------------- | ---------------------------------------------- |
-| `npm run dev`       | Vite dev server with HMR                       |
-| `npm run build`     | Type-check (`vue-tsc`) + production build      |
-| `npm run preview`   | Serve the production build locally             |
-| `npm run typecheck` | Run `vue-tsc --noEmit` only                    |
+| Script              | What it does                              |
+| ------------------- | ----------------------------------------- |
+| `npm run dev`       | Vite dev server with HMR                  |
+| `npm run build`     | Type-check (`vue-tsc`) + production build |
+| `npm run preview`   | Serve the production build locally        |
+| `npm run typecheck` | Run `vue-tsc --noEmit` only               |
 
 ## Project structure
 
@@ -59,24 +59,35 @@ const trackUrl = `${import.meta.env.BASE_URL}track.mp3`;
 
 All visual tweaks live in `src/composables/useThreeScene.ts`.
 
-**Camera angle.** Default is a 3/4 view. For top-down:
+**CD framing.** The camera looks straight down at the CD and auto-fits its
+distance to the canvas aspect ratio (handled by `frameCD()`, called on init
+and on every resize). To tighten or loosen the fit, change `FRAME_RADIUS`:
 
 ```ts
-camera.up.set(0, 0, -1);
-camera.position.set(0, 6, 0);
+const FRAME_RADIUS = 2.0; // CD radius 1.8 + small margin
+```
+
+For a 3/4 angled view instead of top-down, replace the `frameCD()` block with
+a fixed camera:
+
+```ts
+camera.position.set(0, 5, 7);
 camera.lookAt(0, 0, 0);
 ```
+
+(and remove the `camera.up.set(...)` line and the `frameCD()` call inside
+`resizeRendererToDisplaySize`).
 
 **Spin speed.** In the `animate` loop:
 
 ```ts
-targetSpeed = isPlaying.value ? 0.25 : 0;   // radians per frame
+targetSpeed = isPlaying.value ? 0.25 : 0; // radians per frame
 ```
 
 **Brightness.** Adjust at the top of `initThreeScene`:
 
 ```ts
-renderer.toneMappingExposure = 1.2;         // 0.9 = darker, 1.5 = brighter
+renderer.toneMappingExposure = 1.2; // 0.9 = darker, 1.5 = brighter
 ```
 
 **Accent light color / intensity.**
