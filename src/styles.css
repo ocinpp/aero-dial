@@ -48,13 +48,13 @@ body {
 
 .cd-panel {
   width: 60%;
-  background: radial-gradient(circle at center, #1a1a1f 0%, #0a0a0d 100%);
-  border-right: 1px solid #1a1a1c;
-  border-top: 150px solid #111; /* Align with the dialer panel black acrylic */
-  box-shadow:
-    inset 2px 2px 10px rgba(255, 255, 255, 0.05),
-    inset -5px -5px 20px rgba(0, 0, 0, 0.5),
-    5px 0 15px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(
+    to bottom,
+    var(--chassis-light) 0%,
+    var(--chassis-mid) 40%,
+    var(--chassis-dark) 100%
+  );
+  box-shadow: none;
   z-index: 2;
   position: relative;
 }
@@ -65,47 +65,6 @@ body {
   top: 0;
   left: 0;
   z-index: 1;
-}
-
-.cd-panel::after {
-  content: "";
-  position: absolute;
-  top: -150px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(255, 255, 255, 0.05),
-    transparent
-  );
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-  z-index: 5;
-}
-
-.led-overlay {
-  position: absolute;
-  top: -105px; /* Align with the VFD display */
-  bottom: auto;
-  z-index: 5;
-  background: transparent;
-  border: none;
-  padding: 0;
-  font-family: "Share Tech Mono", monospace;
-  color: var(--vfd-cyan);
-  text-shadow:
-    0 0 10px rgba(92, 219, 223, 0.8),
-    0 0 2px var(--vfd-cyan);
-  font-size: 2.4rem;
-  letter-spacing: 8px;
-  transition: all 0.3s ease;
-  box-shadow: none;
-}
-
-.led-overlay.error {
-  color: var(--accent-red);
-  text-shadow: 0 0 8px var(--accent-red);
 }
 
 /* SONY ES STYLE DIALER */
@@ -125,10 +84,7 @@ body {
     var(--chassis-mid) 40%,
     var(--chassis-dark) 100%
   );
-  border-top: 150px solid #111; /* The black acrylic top section */
-  box-shadow:
-    inset 2px 2px 10px rgba(255, 255, 255, 0.8),
-    inset -5px -5px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: none; /* Let the container handle depth if needed */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -137,92 +93,62 @@ body {
   position: relative;
 }
 
-.dialer-chassis::after {
-  content: "";
-  position: absolute;
-  top: -150px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-}
-
-.dialer-chassis::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.02) 2px,
-    rgba(0, 0, 0, 0.02) 4px
-  );
-  pointer-events: none;
-}
-
-/* VFD Display */
+/* VFD Display -> LCD Display */
 .vfd-bezel {
-  background: transparent;
-  padding: 0;
-  border-radius: 0;
-  border: none;
-  box-shadow: none;
-  margin-bottom: 3rem;
+  background: #a9b2a2; /* LCD greenish grey */
+  padding: 15px;
+  border-radius: 8px;
+  border: 3px solid #2a2a2a;
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4);
+  margin-bottom: 2rem;
   width: 280px;
-  position: absolute;
-  top: -105px; /* Move it up into the black acrylic section */
+  position: relative;
 }
 
 .vfd-display {
   width: 100%;
-  height: 60px;
+  min-height: 80px;
   background: transparent;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   font-family: "Share Tech Mono", monospace;
-  font-size: 2.4rem;
-  color: var(--vfd-cyan);
-  text-shadow:
-    0 0 10px rgba(92, 219, 223, 0.8),
-    0 0 2px var(--vfd-cyan);
-  letter-spacing: 8px;
+  color: #222;
+  text-shadow: none;
+  letter-spacing: 4px;
   position: relative;
-  overflow: hidden;
+}
+
+.lcd-status {
+  font-size: 2rem;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+}
+
+.lcd-numbers {
+  font-size: 2.8rem;
+  display: flex;
+  align-items: center;
+}
+
+.vfd-display.error .lcd-status,
+.vfd-display.error .lcd-numbers {
+  color: #4a1111;
+  font-weight: bold;
 }
 
 .scanlines {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0) 50%,
-    rgba(0, 0, 0, 0.2) 50%
-  );
-  background-size: 100% 4px;
-  pointer-events: none;
-  z-index: 2;
+  display: none;
 }
 
 .cursor {
   display: inline-block;
   width: 18px;
   height: 32px;
-  background: var(--vfd-cyan);
-  box-shadow: 0 0 8px var(--vfd-cyan);
+  background: #222;
+  box-shadow: none;
   animation: blink 1s step-end infinite;
   margin-left: 4px;
 }
@@ -237,25 +163,32 @@ body {
 .numpad-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px 25px;
+  gap: 15px 20px;
   margin-top: 1.5rem;
   margin-bottom: 2.5rem;
   position: relative;
   z-index: 10;
+  padding: 20px;
+  border-radius: 12px;
+  /* Add subtle indented outline for the numpad area */
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .metal-btn {
-  width: 68px;
-  height: 48px;
-  border-radius: 6px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
   border: none;
   outline: none;
-  background: linear-gradient(to bottom, #f0f0f0 0%, #d4d4d4 40%, #b0b0b0 100%);
+  background: linear-gradient(to bottom, #f2f2f2 0%, #dfdfdf 100%);
   box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.8),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.2),
-    0 4px 6px rgba(0, 0, 0, 0.4),
-    0 2px 3px rgba(0, 0, 0, 0.2);
+    inset 0 2px 3px rgba(255, 255, 255, 0.9),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.1),
+    0 3px 5px rgba(0, 0, 0, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -269,43 +202,26 @@ body {
   user-select: none;
 }
 
-.metal-btn::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  right: 2px;
-  bottom: 2px;
-  border-radius: 4px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.3) 0%,
-    transparent 50%,
-    rgba(0, 0, 0, 0.1) 100%
-  );
-  pointer-events: none;
-}
-
 .btn-label {
-  color: #222;
+  color: #333;
   font-family: "Inter", sans-serif;
-  font-weight: 600;
-  font-size: 22px;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  font-size: 20px;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
   pointer-events: none;
   z-index: 2;
 }
 
 .metal-btn.is-pressed {
-  transform: translateY(3px) scale(0.96);
+  transform: translateY(2px);
   box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.4),
-    0 1px 1px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(to bottom, #d4d4d4 0%, #b0b0b0 100%);
+    inset 0 3px 5px rgba(0, 0, 0, 0.2),
+    0 1px 1px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(to bottom, #dcdcdc 0%, #c8c8c8 100%);
 }
 
 .metal-btn.is-pressed .btn-label {
-  color: #000;
+  color: #111;
   transform: translateY(1px);
 }
 /* Action Buttons */
@@ -316,14 +232,12 @@ body {
 }
 
 .action-btn {
-  width: 80px;
-  height: 36px;
-  border-radius: 18px; /* Classic pill shape for action buttons */
+  height: 54px;
   border: none;
   outline: none;
   font-family: "Inter", sans-serif;
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 500;
+  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -331,41 +245,53 @@ body {
   transition:
     transform 0.05s ease,
     box-shadow 0.05s ease;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
 }
 
 .clr-btn,
-.end-btn,
-.call-btn {
-  background: linear-gradient(to bottom, #3a3a3c 0%, #151518 100%);
-  border-top: 1px solid #5a5a60;
+.end-btn {
+  width: 54px;
+  border-radius: 50%;
+  background: linear-gradient(to bottom, #f2f2f2 0%, #dfdfdf 100%);
+  color: #333;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
   box-shadow:
-    0 4px 6px rgba(0, 0, 0, 0.6),
-    inset 0 -2px 5px rgba(0, 0, 0, 0.4);
+    inset 0 2px 3px rgba(255, 255, 255, 0.9),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.1),
+    0 3px 5px rgba(0, 0, 0, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .clr-btn.is-pressed,
-.end-btn.is-pressed,
-.call-btn.is-pressed {
+.end-btn.is-pressed {
   transform: translateY(2px);
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.4),
-    inset 0 2px 5px rgba(0, 0, 0, 0.8);
-}
-
-.clr-btn {
-  color: #aaa;
-}
-
-.end-btn {
-  color: var(--accent-red);
+    inset 0 3px 5px rgba(0, 0, 0, 0.2),
+    0 1px 1px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(to bottom, #dcdcdc 0%, #c8c8c8 100%);
 }
 
 .call-btn {
-  color: var(--vfd-cyan);
+  width: 80px;
+  border-radius: 27px;
+  background: linear-gradient(to bottom, #4a4a4c 0%, #2a2a2c 100%);
+  color: #fff;
+  text-shadow: none;
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.2),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.4),
+    0 3px 5px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.call-btn.is-pressed {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 3px 5px rgba(0, 0, 0, 0.5),
+    0 1px 1px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(to bottom, #3a3a3c 0%, #1a1a1c 100%);
 }
 
 .instruction {

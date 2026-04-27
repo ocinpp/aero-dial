@@ -23,7 +23,6 @@ const flashKey = (key: string) => {
 };
 
 const pressKey = (key: string) => {
-  if (isPlaying.value) return;
   if (dialedNumber.value.length < 4) {
     dialedNumber.value += key;
     flashKey(key);
@@ -37,13 +36,16 @@ const clearNumber = () => {
 };
 
 const makeCall = () => {
-  if (isPlaying.value) return;
+  if (isPlaying.value && dialedNumber.value.length === 0) return;
+  if (dialedNumber.value.length === 0) return;
+
   flashKey("call");
 
   if (dialedNumber.value === targetNumber) {
     isPlaying.value = true;
     isError.value = false;
     ledMessage.value = "TRACK 01";
+    dialedNumber.value = "";
     void playMusic(trackUrl);
   } else {
     isError.value = true;
@@ -51,6 +53,7 @@ const makeCall = () => {
     setTimeout(() => {
       isError.value = false;
       if (!isPlaying.value) ledMessage.value = "NO DISC";
+      else ledMessage.value = "TRACK 01";
       dialedNumber.value = "";
     }, 2000);
   }
@@ -77,10 +80,6 @@ onMounted(() => {
     <div class="panel cd-panel">
       <canvas ref="canvasRef" class="three-canvas" />
 
-      <div class="led-overlay" :class="{ error: isError }">
-        {{ ledMessage }}
-      </div>
-
       <div class="swipe-indicator">
         <svg
           width="24"
@@ -102,9 +101,15 @@ onMounted(() => {
     <div class="panel dialer-panel">
       <div class="dialer-chassis">
         <div class="vfd-bezel">
-          <div class="vfd-display">
-            {{ dialedNumber || "" }}
-            <span v-if="!isPlaying" class="cursor" />
+          <div class="vfd-display" :class="{ error: isError }">
+            <template v-if="isError || dialedNumber.length === 0">
+              <div class="lcd-status">{{ ledMessage }}</div>
+            </template>
+            <template v-else>
+              <div class="lcd-numbers">
+                {{ dialedNumber }}<span class="cursor" />
+              </div>
+            </template>
           </div>
         </div>
 
