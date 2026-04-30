@@ -1,7 +1,7 @@
 # AERO-DIAL
 
-A retro audio interface: a 3D CD player paired with a phone-style numeric dialer.
-Dial `1984`, hit **CALL**, and the disc spins up.
+A late-90s/early-2000s Discman-inspired audio interface: a 3D CD player paired with a mechanical numeric dialer. Features a sleek, unified matte silver chassis, perfectly round rubberized buttons, and a dynamic LCD screen.
+Dial `1984`, hit **CALL** (or ENTER), and the disc spins up.
 
 Built with Vue 3 + TypeScript + Three.js, bundled with Vite. Runs fully offline —
 no CDN scripts, no remote fonts.
@@ -57,7 +57,9 @@ const trackUrl = `${import.meta.env.BASE_URL}track.mp3`;
 
 ## Common tweaks
 
-All visual tweaks live in `src/composables/useThreeScene.ts`.
+All visual tweaks for the 3D scene live in `src/composables/useThreeScene.ts`. The UI and chassis colors are controlled in `src/styles.css`.
+
+**Transparent background.** The WebGL canvas has `alpha: true` and the dark/metal background boxes have been removed. This means the CD floats seamlessly over the CSS background of the chassis.
 
 **CD framing.** The camera looks straight down at the CD and auto-fits its
 distance to the canvas aspect ratio (handled by `frameCD()`, called on init
