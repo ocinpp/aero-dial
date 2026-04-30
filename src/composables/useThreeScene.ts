@@ -74,43 +74,73 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
   cdCanvas.height = 512;
   const ctx = cdCanvas.getContext('2d')!;
 
+  // 1. Base metal color for the data area
+  ctx.fillStyle = '#b4b4bd'; // Light cool silver
+  ctx.fillRect(0, 0, 512, 512);
+
+  // 2. Realistic rainbow diffraction spikes
   const gradient = ctx.createConicGradient(0, 256, 256);
-  gradient.addColorStop(0, '#00f0ff');
-  gradient.addColorStop(0.2, '#ff00ff');
-  gradient.addColorStop(0.4, '#ffff00');
-  gradient.addColorStop(0.6, '#00ff00');
-  gradient.addColorStop(0.8, '#0000ff');
-  gradient.addColorStop(1, '#00f0ff');
+
+  gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+  gradient.addColorStop(0.1, 'rgba(255, 0, 255, 0.4)');
+  gradient.addColorStop(0.15, 'rgba(0, 255, 255, 0.4)');
+  gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0)');
+
+  gradient.addColorStop(0.35, 'rgba(255, 255, 255, 0)');
+  gradient.addColorStop(0.4, 'rgba(255, 255, 0, 0.4)');
+  gradient.addColorStop(0.45, 'rgba(0, 255, 0, 0.4)');
+  gradient.addColorStop(0.55, 'rgba(255, 255, 255, 0)');
+
+  gradient.addColorStop(0.65, 'rgba(255, 255, 255, 0)');
+  gradient.addColorStop(0.7, 'rgba(0, 255, 255, 0.4)');
+  gradient.addColorStop(0.75, 'rgba(255, 0, 255, 0.4)');
+  gradient.addColorStop(0.85, 'rgba(255, 255, 255, 0)');
+
+  gradient.addColorStop(0.9, 'rgba(255, 255, 255, 0)');
+  gradient.addColorStop(0.95, 'rgba(0, 255, 0, 0.4)');
+  gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, 512, 512);
 
-  ctx.fillStyle = '#000';
+  // 3. Add concentric rings for the "groove" texture
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+  for (let r = 110; r < 256; r += 4) {
+    ctx.beginPath();
+    ctx.arc(256, 256, r, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // 4. Center dark label area
+  ctx.fillStyle = '#222222';
   ctx.beginPath();
-  ctx.arc(256, 256, 50, 0, Math.PI * 2);
+  ctx.arc(256, 256, 110, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = '#111';
+  ctx.fillStyle = '#111111';
   ctx.beginPath();
-  ctx.arc(256, 256, 120, 0, Math.PI * 2);
+  ctx.arc(256, 256, 40, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 40px Inter, sans-serif';
+  ctx.font = 'bold 54px Inter, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('AERO', 256, 230);
-  ctx.fillText('DIAL', 256, 280);
+  ctx.fillText('AERO', 256, 220);
+  ctx.fillText('DIAL', 256, 285);
 
   const cdTexture = new CanvasTexture(cdCanvas);
   cdTexture.colorSpace = SRGBColorSpace;
   const cdMat = new MeshStandardMaterial({
     map: cdTexture,
     metalness: 1.0,
-    roughness: 0.05,
+    roughness: 0.15, // Slightly rougher for realistic metal scatter
   });
 
   const cd = new Mesh(cdGeo, cdMat);
   cd.position.y = 0.4;
+  cd.rotation.y = Math.PI / 2; // Rotate 90 degrees the other way
   scene.add(cd);
 
   const metalMat = new MeshStandardMaterial({
