@@ -1,7 +1,6 @@
 import {
   ACESFilmicToneMapping,
   AmbientLight,
-  BoxGeometry,
   CanvasTexture,
   CylinderGeometry,
   DirectionalLight,
@@ -67,24 +66,7 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
   backLight.position.set(3, 2, -3);
   scene.add(backLight);
 
-  const metalMat = new MeshStandardMaterial({
-    color: 0x999999,
-    metalness: 1.0,
-    roughness: 0.15,
-  });
 
-  const darkMat = new MeshStandardMaterial({
-    color: 0x111111,
-    metalness: 0.8,
-    roughness: 0.6,
-  });
-
-  const body = new Mesh(new BoxGeometry(5.5, 0.5, 4.5), metalMat);
-  scene.add(body);
-
-  const top = new Mesh(new BoxGeometry(5.3, 0.1, 4.3), darkMat);
-  top.position.y = 0.3;
-  scene.add(top);
 
   const cdGeo = new CylinderGeometry(1.8, 1.8, 0.02, 64);
   const cdCanvas = document.createElement('canvas');
@@ -130,6 +112,12 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
   const cd = new Mesh(cdGeo, cdMat);
   cd.position.y = 0.4;
   scene.add(cd);
+
+  const metalMat = new MeshStandardMaterial({
+    color: 0x999999,
+    metalness: 1.0,
+    roughness: 0.15,
+  });
 
   const spindle = new Mesh(new CylinderGeometry(0.2, 0.2, 0.4, 32), metalMat);
   spindle.position.y = 0.6;
