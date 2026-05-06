@@ -1,5 +1,6 @@
 import {
   ACESFilmicToneMapping,
+  NoToneMapping,
   AmbientLight,
   CanvasTexture,
   CylinderGeometry,
@@ -17,10 +18,17 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import type { Ref } from 'vue';
 
 export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean>) {
+  // -- CD Design Configuration --
+  // Change this to 'full-cover', 'center-label', or 'text-only' to see different styles
+  let CD_STYLE = 'full-cover' as 'full-cover' | 'center-label' | 'text-only';
+  const COVER_IMAGE_URL = `${import.meta.env.BASE_URL}cd-cover.png`;
+
+  const isFullCover = CD_STYLE === 'full-cover';
+
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.toneMapping = ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.2;
+  renderer.toneMapping = isFullCover ? NoToneMapping : ACESFilmicToneMapping;
+  renderer.toneMappingExposure = isFullCover ? 1.0 : 1.2;
 
   const scene = new Scene();
   const camera = new PerspectiveCamera(
@@ -49,24 +57,22 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
   scene.environment = envMap;
   pmremGenerator.dispose();
 
-  const ambientLight = new AmbientLight(0xffffff, 0.6);
+  const ambientLight = new AmbientLight(0xffffff, isFullCover ? 1.0 : 0.6);
   scene.add(ambientLight);
 
-  const dirLight = new DirectionalLight(0xffffff, 3);
+  const dirLight = new DirectionalLight(0xffffff, isFullCover ? 0.0 : 3);
   dirLight.position.set(5, 10, 5);
   scene.add(dirLight);
 
   // Decay 0 disables physically-correct distance falloff so these lights
   // behave like the original r128 setup at the same intensity scale.
-  const pointLight = new PointLight(0x00f0ff, 4, 20, 0);
+  const pointLight = new PointLight(0x00f0ff, isFullCover ? 0.5 : 4, 20, 0);
   pointLight.position.set(-3, 3, 3);
   scene.add(pointLight);
 
-  const backLight = new PointLight(0xff00ff, 2, 20, 0);
+  const backLight = new PointLight(0xff00ff, isFullCover ? 0.5 : 2, 20, 0);
   backLight.position.set(3, 2, -3);
   scene.add(backLight);
-
-
 
   const cdGeo = new CylinderGeometry(1.8, 1.8, 0.02, 64);
   const cdCanvas = document.createElement('canvas');
@@ -74,68 +80,100 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
   cdCanvas.height = 512;
   const ctx = cdCanvas.getContext('2d')!;
 
-  // 1. Base metal color for the data area
-  ctx.fillStyle = '#b4b4bd'; // Light cool silver
-  ctx.fillRect(0, 0, 512, 512);
+  const drawCDTexture = (img?: HTMLImageElement) => {
+    ctx.clearRect(0, 0, 512, 512);
 
-  // 2. Realistic rainbow diffraction spikes
-  const gradient = ctx.createConicGradient(0, 256, 256);
+    if (CD_STYLE === 'full-cover' && img) {
+      // 1. The "Full Print" CD: Image covers the entire disc
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(256, 256, 256, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(img, 0, 0, 512, 512);
+      ctx.restore();
+    } else {
+      // 2. Base metallic surface with diffraction (used for center-label or text-only)
+      ctx.fillStyle = '#b4b4bd'; // Light cool silver
+      ctx.fillRect(0, 0, 512, 512);
 
-  gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
-  gradient.addColorStop(0.1, 'rgba(255, 0, 255, 0.4)');
-  gradient.addColorStop(0.15, 'rgba(0, 255, 255, 0.4)');
-  gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0)');
+      const gradient = ctx.createConicGradient(0, 256, 256);
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+      gradient.addColorStop(0.1, 'rgba(255, 0, 255, 0.4)');
+      gradient.addColorStop(0.15, 'rgba(0, 255, 255, 0.4)');
+      gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0)');
+      gradient.addColorStop(0.35, 'rgba(255, 255, 255, 0)');
+      gradient.addColorStop(0.4, 'rgba(255, 255, 0, 0.4)');
+      gradient.addColorStop(0.45, 'rgba(0, 255, 0, 0.4)');
+      gradient.addColorStop(0.55, 'rgba(255, 255, 255, 0)');
+      gradient.addColorStop(0.65, 'rgba(255, 255, 255, 0)');
+      gradient.addColorStop(0.7, 'rgba(0, 255, 255, 0.4)');
+      gradient.addColorStop(0.75, 'rgba(255, 0, 255, 0.4)');
+      gradient.addColorStop(0.85, 'rgba(255, 255, 255, 0)');
+      gradient.addColorStop(0.9, 'rgba(255, 255, 255, 0)');
+      gradient.addColorStop(0.95, 'rgba(0, 255, 0, 0.4)');
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
-  gradient.addColorStop(0.35, 'rgba(255, 255, 255, 0)');
-  gradient.addColorStop(0.4, 'rgba(255, 255, 0, 0.4)');
-  gradient.addColorStop(0.45, 'rgba(0, 255, 0, 0.4)');
-  gradient.addColorStop(0.55, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 512, 512);
 
-  gradient.addColorStop(0.65, 'rgba(255, 255, 255, 0)');
-  gradient.addColorStop(0.7, 'rgba(0, 255, 255, 0.4)');
-  gradient.addColorStop(0.75, 'rgba(255, 0, 255, 0.4)');
-  gradient.addColorStop(0.85, 'rgba(255, 255, 255, 0)');
+      // Concentric data grooves
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+      for (let r = 110; r < 256; r += 4) {
+        ctx.beginPath();
+        ctx.arc(256, 256, r, 0, Math.PI * 2);
+        ctx.stroke();
+      }
 
-  gradient.addColorStop(0.9, 'rgba(255, 255, 255, 0)');
-  gradient.addColorStop(0.95, 'rgba(0, 255, 0, 0.4)');
-  gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      if (CD_STYLE === 'center-label' && img) {
+        // The "Hybrid Canvas" CD: Metallic outer, printed center label
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(256, 256, 110, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(img, 256 - 110, 256 - 110, 220, 220);
+        ctx.restore();
+      } else {
+        // Text-only fallback
+        ctx.fillStyle = '#222222';
+        ctx.beginPath();
+        ctx.arc(256, 256, 110, 0, Math.PI * 2);
+        ctx.fill();
 
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 512, 512);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 54px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('AERO', 256, 220);
+        ctx.fillText('DIAL', 256, 285);
+      }
+    }
 
-  // 3. Add concentric rings for the "groove" texture
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
-  for (let r = 110; r < 256; r += 4) {
+    // Inner hole (always transparent/dark)
+    ctx.fillStyle = '#111111';
     ctx.beginPath();
-    ctx.arc(256, 256, r, 0, Math.PI * 2);
-    ctx.stroke();
-  }
+    ctx.arc(256, 256, 40, 0, Math.PI * 2);
+    ctx.fill();
+  };
 
-  // 4. Center dark label area
-  ctx.fillStyle = '#222222';
-  ctx.beginPath();
-  ctx.arc(256, 256, 110, 0, Math.PI * 2);
-  ctx.fill();
+  // Draw initial state
+  drawCDTexture();
 
-  ctx.fillStyle = '#111111';
-  ctx.beginPath();
-  ctx.arc(256, 256, 40, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 54px Inter, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('AERO', 256, 220);
-  ctx.fillText('DIAL', 256, 285);
+  // Try to load the custom image cover
+  const img = new Image();
+  img.src = COVER_IMAGE_URL;
+  img.onload = () => {
+    drawCDTexture(img);
+    cdTexture.needsUpdate = true;
+  };
 
   const cdTexture = new CanvasTexture(cdCanvas);
   cdTexture.colorSpace = SRGBColorSpace;
   const cdMat = new MeshStandardMaterial({
     map: cdTexture,
-    metalness: 1.0,
-    roughness: 0.15, // Slightly rougher for realistic metal scatter
+    metalness: CD_STYLE === 'full-cover' ? 0.0 : 1.0,
+    roughness: CD_STYLE === 'full-cover' ? 0.9 : 0.15,
+    envMapIntensity: CD_STYLE === 'full-cover' ? 0.0 : 1.0,
   });
 
   const cd = new Mesh(cdGeo, cdMat);
@@ -177,9 +215,11 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
     cd.rotation.y += currentSpeed;
 
     if (isPlaying.value) {
-      pointLight.intensity = 4 + Math.sin(Date.now() * 0.005) * 2;
+      const baseIntensity = isFullCover ? 0.5 : 4;
+      const pulse = isFullCover ? 0.2 : 2;
+      pointLight.intensity = baseIntensity + Math.sin(Date.now() * 0.005) * pulse;
     } else {
-      pointLight.intensity = 1;
+      pointLight.intensity = isFullCover ? 0.3 : 1;
     }
 
     renderer.render(scene, camera);
