@@ -1,3 +1,5 @@
+import { AUDIO_CONFIG } from '../config/audioConfig';
+
 interface MusicNodes {
   sources: AudioScheduledSourceNode[];
   masterGain: GainNode;
@@ -8,8 +10,8 @@ type WebkitWindow = Window & { webkitAudioContext?: typeof AudioContext };
 export function useAudio() {
   let audioCtx: AudioContext | null = null;
   let musicNodes: MusicNodes | null = null;
-  let trackBuffer: AudioBuffer | null = null;
-  let trackLoadPromise: Promise<AudioBuffer> | null = null;
+  const trackBuffers = new Map<string, AudioBuffer>();
+  const trackLoadPromises = new Map<string, Promise<AudioBuffer>>();
 
   const ensureCtx = (): AudioContext => {
     if (!audioCtx) {
@@ -21,25 +23,26 @@ export function useAudio() {
   };
 
   const loadTrack = (url: string): Promise<AudioBuffer> => {
-    if (trackBuffer) return Promise.resolve(trackBuffer);
-    if (!trackLoadPromise) {
+    if (trackBuffers.has(url)) return Promise.resolve(trackBuffers.get(url)!);
+    if (!trackLoadPromises.has(url)) {
       const ctx = ensureCtx();
-      trackLoadPromise = fetch(url)
+      const promise = fetch(url)
         .then((res) => {
           if (!res.ok) throw new Error(`Failed to fetch track: ${res.status}`);
           return res.arrayBuffer();
         })
         .then((data) => ctx.decodeAudioData(data))
         .then((buf) => {
-          trackBuffer = buf;
+          trackBuffers.set(url, buf);
           return buf;
         })
         .catch((err) => {
-          trackLoadPromise = null;
+          trackLoadPromises.delete(url);
           throw err;
         });
+      trackLoadPromises.set(url, promise);
     }
-    return trackLoadPromise;
+    return trackLoadPromises.get(url)!;
   };
 
   const playTone = (key: string) => {
@@ -85,10 +88,10 @@ export function useAudio() {
     musicNodes = { sources, masterGain };
   };
 
-  const playTrackBuffer = (ctx: AudioContext, buffer: AudioBuffer) => {
+  const playTrackBuffer = (ctx: AudioContext, buffer: AudioBuffer, onEnded?: () => void) => {
     const source = ctx.createBufferSource();
     source.buffer = buffer;
-    source.loop = true;
+    source.loop = AUDIO_CONFIG.loopTrack;
 
     const masterGain = ctx.createGain();
     masterGain.gain.setValueAtTime(0, ctx.currentTime);
@@ -98,17 +101,23 @@ export function useAudio() {
     masterGain.connect(ctx.destination);
     source.start();
 
+    source.onended = () => {
+      if (!source.loop) {
+        onEnded?.();
+      }
+    };
+
     musicNodes = { sources: [source], masterGain };
   };
 
-  const playMusic = async (trackUrl?: string) => {
+  const playMusic = async (trackUrl?: string, onEnded?: () => void) => {
     const ctx = ensureCtx();
 
     if (trackUrl) {
       try {
         const buffer = await loadTrack(trackUrl);
         if (musicNodes) return;
-        playTrackBuffer(ctx, buffer);
+        playTrackBuffer(ctx, buffer, onEnded);
         return;
       } catch (err) {
         console.warn('Track load failed, falling back to synth:', err);

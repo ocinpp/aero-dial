@@ -2,14 +2,14 @@
 import { onMounted, ref, useTemplateRef } from "vue";
 import { useAudio } from "./composables/useAudio";
 import { initThreeScene } from "./composables/useThreeScene";
+import { AUDIO_CONFIG } from "./config/audioConfig";
 
 const dialedNumber = ref("");
 const isPlaying = ref(false);
 const isError = ref(false);
 const ledMessage = ref("NO DISC");
+const currentTrackTitle = ref<string | null>(null);
 const activeKey = ref<string | null>(null);
-const targetNumber = "1984";
-const trackUrl = `${import.meta.env.BASE_URL}track.mp3`;
 
 const canvasRef = useTemplateRef<HTMLCanvasElement>("canvasRef");
 const { playTone, playMusic, stopMusic } = useAudio();
@@ -41,19 +41,30 @@ const makeCall = () => {
 
   flashKey("call");
 
-  if (dialedNumber.value === targetNumber) {
+  const trackConfig = AUDIO_CONFIG.passcodes[dialedNumber.value];
+
+  if (trackConfig) {
+    stopMusic();
+
     isPlaying.value = true;
     isError.value = false;
-    ledMessage.value = "TRACK 01";
+    currentTrackTitle.value = trackConfig.title;
+    ledMessage.value = trackConfig.title;
     dialedNumber.value = "";
-    void playMusic(trackUrl);
+
+    void playMusic(trackConfig.url, () => {
+      isPlaying.value = false;
+      currentTrackTitle.value = null;
+      ledMessage.value = "NO DISC";
+      stopMusic();
+    });
   } else {
     isError.value = true;
     ledMessage.value = "ERR NUM";
     setTimeout(() => {
       isError.value = false;
       if (!isPlaying.value) ledMessage.value = "NO DISC";
-      else ledMessage.value = "TRACK 01";
+      else ledMessage.value = currentTrackTitle.value || "PLAYING";
       dialedNumber.value = "";
     }, 2000);
   }
