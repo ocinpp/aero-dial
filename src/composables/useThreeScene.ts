@@ -76,27 +76,27 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
 
   const cdGeo = new CylinderGeometry(1.8, 1.8, 0.02, 64);
   const cdCanvas = document.createElement('canvas');
-  cdCanvas.width = 512;
-  cdCanvas.height = 512;
+  cdCanvas.width = 1024;
+  cdCanvas.height = 1024;
   const ctx = cdCanvas.getContext('2d')!;
 
   const drawCDTexture = (img?: HTMLImageElement) => {
-    ctx.clearRect(0, 0, 512, 512);
+    ctx.clearRect(0, 0, 1024, 1024);
 
     if (CD_STYLE === 'full-cover' && img) {
       // 1. The "Full Print" CD: Image covers the entire disc
       ctx.save();
       ctx.beginPath();
-      ctx.arc(256, 256, 256, 0, Math.PI * 2);
+      ctx.arc(512, 512, 512, 0, Math.PI * 2);
       ctx.clip();
-      ctx.drawImage(img, 0, 0, 512, 512);
+      ctx.drawImage(img, 0, 0, 1024, 1024);
       ctx.restore();
     } else {
       // 2. Base metallic surface with diffraction (used for center-label or text-only)
       ctx.fillStyle = '#b4b4bd'; // Light cool silver
-      ctx.fillRect(0, 0, 512, 512);
+      ctx.fillRect(0, 0, 1024, 1024);
 
-      const gradient = ctx.createConicGradient(0, 256, 256);
+      const gradient = ctx.createConicGradient(0, 512, 512);
       gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
       gradient.addColorStop(0.1, 'rgba(255, 0, 255, 0.4)');
       gradient.addColorStop(0.15, 'rgba(0, 255, 255, 0.4)');
@@ -114,14 +114,14 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
       gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 512, 512);
+      ctx.fillRect(0, 0, 1024, 1024);
 
       // Concentric data grooves
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 2;
       ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
-      for (let r = 110; r < 256; r += 4) {
+      for (let r = 220; r < 512; r += 8) {
         ctx.beginPath();
-        ctx.arc(256, 256, r, 0, Math.PI * 2);
+        ctx.arc(512, 512, r, 0, Math.PI * 2);
         ctx.stroke();
       }
 
@@ -129,30 +129,30 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
         // The "Hybrid Canvas" CD: Metallic outer, printed center label
         ctx.save();
         ctx.beginPath();
-        ctx.arc(256, 256, 110, 0, Math.PI * 2);
+        ctx.arc(512, 512, 220, 0, Math.PI * 2);
         ctx.clip();
-        ctx.drawImage(img, 256 - 110, 256 - 110, 220, 220);
+        ctx.drawImage(img, 512 - 220, 512 - 220, 440, 440);
         ctx.restore();
       } else {
         // Text-only fallback
         ctx.fillStyle = '#222222';
         ctx.beginPath();
-        ctx.arc(256, 256, 110, 0, Math.PI * 2);
+        ctx.arc(512, 512, 220, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 54px Inter, sans-serif';
+        ctx.font = 'bold 108px Inter, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('AERO', 256, 220);
-        ctx.fillText('DIAL', 256, 285);
+        ctx.fillText('AERO', 512, 440);
+        ctx.fillText('DIAL', 512, 570);
       }
     }
 
     // Inner hole (always transparent/dark)
     ctx.fillStyle = '#111111';
     ctx.beginPath();
-    ctx.arc(256, 256, 40, 0, Math.PI * 2);
+    ctx.arc(512, 512, 80, 0, Math.PI * 2);
     ctx.fill();
   };
 
@@ -169,6 +169,7 @@ export function initThreeScene(canvas: HTMLCanvasElement, isPlaying: Ref<boolean
 
   const cdTexture = new CanvasTexture(cdCanvas);
   cdTexture.colorSpace = SRGBColorSpace;
+  cdTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
   const cdMat = new MeshStandardMaterial({
     map: cdTexture,
     metalness: CD_STYLE === 'full-cover' ? 0.0 : 1.0,
